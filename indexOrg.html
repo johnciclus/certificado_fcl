@@ -1,0 +1,170 @@
+<html>
+<head>
+<title>
+Diploma del Festival de la Cultura Libre.
+</title>
+<script type="text/javascript" src="scripts/jquery-1.7.1.min.js"></script>
+<script type="text/javascript">
+	$(document).ready(
+		function(){
+		canvas = document.getElementById('viewer');
+		var dataURL;
+		if(canvas && canvas.getContext){
+			context = canvas.getContext('2d');		
+			refresh();
+			$("#subir").click(function (){
+				subir();
+			});
+			$("#guardar").click(function (){
+				guardar('http://localhost/certificado/saveme.php');
+			});
+		}
+	});
+	function loadImages(sources, callback){
+		var images = {};
+		var loadedImages = 0;
+		var numImages = 0;
+		for (var src in sources){
+			numImages++;
+		}
+		for (var src in sources){
+			images[src] = new Image();
+			images[src].onload = function() {
+				if(++loadedImages>=numImages){
+					callback(images);
+				}
+			};
+			images[src].src = sources[src];
+		}
+	};
+	function impTexto(nombre, x, y, paraTypo){
+		if(paraTypo==undefined){
+			paraTypo = {};
+		}
+		if(paraTypo.font){
+			context.font = paraTypo.font;
+		}else{
+			context.font = 'italic 60pt Corsiva';
+		};
+		if(paraTypo.fillStyle){
+			context.fillStyle = paraTypo.fillStyle;
+		}else{
+			context.fillStyle = '#000';
+		};
+		if(paraTypo.textAlign){
+			context.textAlign = paraTypo.textAlign;
+		}else{
+			context.textAlign = 'center';
+		};
+		context.fillText(nombre, x, y);
+		
+	};
+	
+	var canvas;
+	var context;
+	var sources = {
+		fondo: "./images/FractalFinal.png",
+		marco: "./images/Marco.png",
+		freeculture: "./images/FreeCulture.png",
+		titulo: "./images/Titulo.png",
+		condicion: "./images/condicion.png",
+		logos: "./images/logos.png",
+		firma_isaacs: "./images/firma_isaacs.png",
+		firma_sofia: "./images/firma_sofia.png",
+		firma_gerardo: "./images/firma_gerardo.png"
+	};
+	function refresh(){
+		context.fillStyle = "rgba(255,255,255,1.0)";
+		context.fillRect(0, 0, 1280, 960);
+		loadImages(sources, function(images){
+			context.drawImage(images.fondo, -100, 60);
+			context.drawImage(images.marco, 0, -15);
+			context.drawImage(images.freeculture, 150, 125);
+			context.drawImage(images.titulo, 475, 175);
+			context.drawImage(images.condicion, 220, 725);
+			context.drawImage(images.condicion, 535, 725);
+			context.drawImage(images.condicion, 850, 725);
+			context.drawImage(images.logos, 50, 880);
+			context.drawImage(images.firma_isaacs, 210, 680);
+			context.drawImage(images.firma_sofia, 490, 700);
+			context.drawImage(images.firma_gerardo, 800, 710);
+		});
+		var x = canvas.width / 2;		
+	};
+	function formatoNum(id){
+		var ln = id.length;
+		var n = parseInt((ln-1)/3);
+		var v=[];
+		for(var i=0; i<n; i++){
+			v.push(ln-((i+1)*3));
+		}
+		for(var i=0; i<v.length ; i++){
+			id =  id.substr(0,v[i])+'.'+id.substr(v[i],ln+i);
+		}
+		return id;
+	};
+	function subir(){
+		var name=$("#nombre").val();
+		var x = canvas.width / 2;
+		var y = canvas.height / 2;
+		impTexto(name, x, y-25);			
+		
+		var id=$("#id").val();
+		x = canvas.width / 2;
+		y = canvas.height * (1.8 / 3);
+		var docID = id.split(" ");
+		var num = docID[0];
+		num=formatoNum(num);
+		docID[0]=num;
+		impTexto(docID.join(" "), x, y-25, {font: 'italic 40pt Corsiva'});
+		impTexto("Certificado de organizador.", x, 150, {font: '20pt Georgia'});
+		impTexto("Certifica que:", x, 375, {font: '18pt Georgia'});
+		impTexto("Identificado con documento de identidad numero:", x, 500, {font: '18pt Georgia'});
+		impTexto("Participó en calidad de organizador del Primer Festival de la Cultura Libre.", x, 600, {font: '18pt Georgia'});
+		impTexto("Destacándose por su liderazgo, capacidad de gestión, iniciativa, ", x, 625, {font: '18pt Georgia'});
+		impTexto("creatividad y trabajo en equipo.", x, 650, {font: '18pt Georgia'});
+		impTexto("", x, 675, {font: '18pt Georgia'});
+		
+		x=(canvas.width / 3)-100;
+		impTexto("__________________", x, 775, {font: '20pt Georgia'});
+		impTexto("Rafael F. Isaacs G.", x, 800, {font: '20pt Georgia'});
+		impTexto("Presidente FCL 2012", x, 820, {font: '16pt Georgia'});
+		
+		x=canvas.width / 2;
+		impTexto("__________________", x, 775, {font: '20pt Georgia'});
+		impTexto("Sofía Pinzón Durán.", x, 800, {font: '20pt Georgia'});
+		impTexto("Decana Fac. Ciencias UIS", x, 820, {font: '16pt Georgia'});
+		
+		impTexto("Bucaramanga, 30 y 31 de julio del 2012.", x, 860, {font: '20pt Georgia'});
+		
+		x=(canvas.width * 2 / 3)+100;
+		impTexto("__________________", x, 775, {font: '20pt Georgia'});
+		impTexto("Gerardo Latorre.", x, 800, {font: '20pt Georgia'});
+		impTexto("Decano Fac. Ing. Fisicomecánicas", x, 820, {font: '16pt Georgia'});
+	};
+	function guardar(url){
+		var data = canvas.toDataURL("image/jpg");
+		data = data.substr(data.indexOf(',') + 1).toString();
+		
+		var id = $("#id").val();
+		var fileName = id.split(" ")[0];
+		
+		$.post(url, { 	name: fileName,
+						imgdata: data }
+		);
+	};
+	
+</script>
+</head>
+<body>
+<canvas id="viewer" width="1280" height="960">
+<p>Tu navegador no soporta Canvas Html5</p>
+</canvas>
+<form>
+	<label for="nombre">Nombre :</label><input type="text" name="nombre" id="nombre">
+	<label for="id">Identificación :</label><input type="text" name="id" id="id">
+	<button type="button" id="subir">Subir</button>
+	<button type="button" id="guardar">Guardar</button>
+</form>
+</body>
+</html>
